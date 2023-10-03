@@ -1,7 +1,7 @@
 use fpga::SendBuffer64;
 use msm_fpga::{random_points, timed};
 use msm_fpga::{App, Instruction};
-use our_bls12_377::{G1Affine, G1Projective, G1TEProjective};
+use our_bls12_377::G1Projective;
 
 fn main() {
     let size = 1;
@@ -12,9 +12,9 @@ fn main() {
     let points = timed("generating random points", || random_points(size));
 
     #[allow(non_snake_case)]
-    let P: G1Projective = points[0].into();
+    let _P: G1Projective = points[0].into();
     #[allow(non_snake_case)]
-    let Q: G1Projective = points[1].into();
+    let _Q: G1Projective = points[1].into();
 
     app.set_points(&points);
 
