@@ -1,13 +1,12 @@
 //! # fpga
 //!
 //! Rust bindings to interact with AWS F1 FPGAs.
-use std::fmt;
 use core::ops;
+use std::fmt;
 #[cfg(feature = "f1")]
 // use core::ptr;
 
 // use std::fs::File;
-
 use thiserror::Error;
 
 #[cfg(feature = "f1")]
@@ -74,16 +73,34 @@ pub trait Fpga {
 }
 
 #[derive(Clone)]
-pub enum SendData{
+pub enum SendData {
     U8(Vec<u8>),
-    U64(Vec<u64>)
+    U64(Vec<u64>),
 }
 
 impl fmt::Debug for SendData {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            SendData::U8(vec) => write!(f, "{:?}", vec),
-            SendData::U64(vec) => write!(f, "{:?}", vec),
+            SendData::U8(vec) => {
+                write!(
+                    f,
+                    "{}",
+                    vec.iter()
+                        .map(|x| format!("{:02X}", x))
+                        .collect::<Vec<String>>()
+                        .join("")
+                )
+            }
+            SendData::U64(vec) => {
+                write!(
+                    f,
+                    "{}",
+                    vec.iter()
+                        .map(|x| format!("{:016X}", x))
+                        .collect::<Vec<String>>()
+                        .join("")
+                )
+            }
         }
     }
 }
@@ -107,7 +124,11 @@ pub struct F1 {
 
 impl fmt::Display for F1 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "data:\n{:?}\n register writes are:\n{:?}", self.data, self.register_writes )
+        write!(
+            f,
+            "data:\n{:?}\n register writes are:\n{:?}",
+            self.data, self.register_writes
+        )
     }
 }
 
@@ -217,8 +238,9 @@ impl Fpga for F1 {
     fn send(&mut self, index: usize, buffer: &SendBuffer) {
         let offset = index << 6;
         let slice: &[u8] = &**buffer;
-        self.data.push((offset, SendData::U8(slice.to_vec())));
-        println!("send data (offset: {:?}, u8: {:?}) \n", offset, slice);
+        let send_data = SendData::U8(slice.to_vec());
+        self.data.push((offset, send_data.clone()));
+        println!("send data (offset: {:?}, u8: {:?}) \n", offset, send_data);
         // unsafe { sys::write_512_f1(offset as u64, &slice[0] as *const _ as _) };
         // if self.cmdlog.is_some() {
         //     self.cmdlog(offset, slice);
@@ -228,8 +250,9 @@ impl Fpga for F1 {
     fn send64(&mut self, index: usize, buffer: &SendBuffer64) {
         let offset = index << 6;
         let slice: &[u64] = &**buffer;
-        self.data.push((offset, SendData::U64(slice.to_vec())));
-        println!("send data (offset: {:?}, u64: {:?}) \n", offset, slice);
+        let send_data = SendData::U64(slice.to_vec());
+        self.data.push((offset, send_data.clone()));
+        println!("send data (offset: {:?}, u64: {:?}) \n", offset, send_data);
         // unsafe { sys::write_512_f1(offset as u64, &slice[0] as *const _ as _) };
         // if self.cmdlog.is_some() {
         //     let slice = unsafe { core::slice::from_raw_parts(
@@ -243,7 +266,10 @@ impl Fpga for F1 {
     fn write_register(&mut self, index: u32, value: u32) {
         let offset = index << 2;
         self.register_writes.push((offset, value));
-        println!("write to register (offset: {:?}, u8: {:?}) \n", offset, value);
+        println!(
+            "write to register (offset: {:?}, u8: {:?}) \n",
+            offset, value
+        );
         // unsafe { sys::write_32_f1(offset, value) };
         // if self.reglog.is_some() {
         //     self.reglog(offset, value);

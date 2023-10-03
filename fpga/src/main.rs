@@ -1,4 +1,4 @@
-use fpga::{SendBuffer, F1, Fpga};
+use fpga::{Fpga, SendBuffer, F1};
 
 fn encode(a: u64, b: u64, twiddle: u64) -> SendBuffer {
     let mut buffer = SendBuffer::default();
@@ -8,7 +8,7 @@ fn encode(a: u64, b: u64, twiddle: u64) -> SendBuffer {
     buffer
 }
 
-fn main(){
+fn main() {
     let mut fpga = F1::new(0, 0).unwrap();
     println!("init");
 
