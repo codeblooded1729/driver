@@ -98,8 +98,7 @@ impl fmt::Debug for SendData {
                     "{}",
                     vec.iter()
                         .rev()
-                        .map(|x| x.to_be_bytes().iter().map(|byte| format!("{:02X}", byte)).collect::<Vec<String>>())
-                        .flatten()
+                        .flat_map(|x| x.to_be_bytes().iter().map(|byte| format!("{:02X}", byte)).collect::<Vec<String>>())
                         .collect::<Vec<String>>()
                         .join("")
                 )
