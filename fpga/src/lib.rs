@@ -86,7 +86,6 @@ impl fmt::Debug for SendData {
                     f,
                     "{}",
                     vec.iter()
-                        .rev()
                         .map(|x| format!("{:02X}", x))
                         .collect::<Vec<String>>()
                         .join("")
